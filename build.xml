@@ -1,0 +1,10 @@
+<project name="carStatistics" default="test" basedir="."
+         xmlns:ivy="antlib:org.apache.ivy.ant" 
+         xmlns:cs="antlib:com.puppycrawl.tools.checkstyle">
+  <description>
+    project description
+  </description>
+
+  <property file="project.properties" />
+  <import file="plugins/build.xml" as="phases" />
+</project>
