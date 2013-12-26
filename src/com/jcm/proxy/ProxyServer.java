@@ -1,33 +1,26 @@
 package com.jcm.proxy;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-
 import com.jcm.nioserver.Notifier;
 import com.jcm.nioserver.Server;
-import com.ztools.conf.Environment;
+import com.jcm.util.Util;
 
 public class ProxyServer {
 
     public static void main(String[] args) {
         try {
             ProxyHandler proxy = new ProxyHandler();
+            LogHandler log = new LogHandler();
             Notifier notifier = Notifier.getNotifier();
             notifier.addListener(proxy);
+            notifier.addListener(log);
             
-            InputStream inputStream = new FileInputStream(new File(Environment.getContext()+"conf/jcm.properties"));
-            Properties p = new Properties();
-            p.load(inputStream);
-            Server server = new Server(Integer.valueOf(p.getProperty("port")), 
-            		Integer.valueOf(p.getProperty("rw_thread_count")));
+            Server server = new Server(Integer.valueOf(Util.p.getProperty("port")), 
+                    Integer.valueOf(Util.p.getProperty("rw_thread_count")));
             Thread tServer = new Thread(server);
             tServer.start();
-        }
-        catch (Exception e) {
-            System.out.println("Server error: " + e.getMessage());
+        } catch (Exception e) {
+            LogHandler.log.error("Server error: " + e.getMessage());
             System.exit(-1);
         }
     }

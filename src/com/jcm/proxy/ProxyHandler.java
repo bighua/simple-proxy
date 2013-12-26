@@ -5,49 +5,41 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
+
 import com.jcm.nioserver.Request;
 import com.jcm.nioserver.Response;
 import com.jcm.nioserver.event.EventAdapter;
+import com.jcm.util.AESCoder;
+import com.jcm.util.Util;
 
 /**
  * 代理服务器处理请求
  */
 public class ProxyHandler extends EventAdapter {
-    public ProxyHandler() {
-    }
-
-    private int BUFFER_SIZE = 1024;
-    private Socket s = null;
-
-    @Override
-    public void onAccept() throws Exception {
-        System.out.println("===================ready for the new connection...");
-    }
-    
-    @Override
-    public void onAccepted(Request request) throws Exception {
-        System.out.println("connect with " + request.getAddress().getHostAddress() + ":" + request.getPort());
-    }
 
     public void onRead(Request request)  throws Exception {
-//        String host = "localhost";
-//        int port=1200;
-        String host = "search.8chedao.com";
-        int port=38254;
         // 解析请求URL，转换成真实请求url
-        if (filter(request)) {
-            s = new Socket(host,port);
+        String indexOp = parse(request);
+        if (indexOp != null) {
+            String host = Util.p.getProperty(indexOp + "_host");
+            int port = Integer.valueOf(Util.p.getProperty(indexOp + "_port"));
+            Socket s = new Socket(host,port);
             OutputStream output = s.getOutputStream();
             output.write(request.getDataInput());
             output.flush();
             s.shutdownOutput();
-            System.out.println("transfer the request to " + host + ":" + port);
+            request.attach(s);
+            LogHandler.log.info("transfer the request to " + host + ":" + port);
         } else {
-            System.out.println("Illegal request from "  + host + ":" + port);
+            LogHandler.log.error("Illegal request from "  + request.getAddress().getHostAddress() + ":" + request.getPort());
         }
     }
     
     public void onWrite(Request request, Response response)  throws Exception {
+        if (request.attachment() == null) return;
+        Socket s = (Socket)request.attachment();
         try {
             // 将服务器端数据写入reponse
             response.send(readFromSocket(s.getInputStream()));
@@ -56,30 +48,36 @@ public class ProxyHandler extends EventAdapter {
         }
     }
     
-    public void onClosed(Request request) throws Exception {
-        System.out.println("Close connection with " + request.getAddress().getHostAddress() + ":" + request.getPort());
-    }
-
-    public void onError(String error) {
-        System.out.println("Exception occurs: \n" + error);
-    }
-    
-    private boolean filter(Request request) {
-        boolean result = true;
-        return result;
+    private String parse(Request request) throws Exception {
+        String indexOp = null;
+        String requestStr = new String(request.getDataInput());
+        String url = requestStr.substring(0, requestStr.indexOf(Util.LINE_SEPARATOR)).split(Util.SPACE)[1];
+        byte[] key = Hex.decodeHex(url.substring(0, 32).toCharArray());
+        byte[] data = Hex.decodeHex(url.substring(32).toCharArray());
+        String realUrl = StringUtils.newString(AESCoder.decrypt(data, AESCoder.toKey(key)), "UTF-8");
+        int indexKey = realUrl.indexOf(Util.INDEX_KEY);
+        if (indexKey > -1) {
+            indexOp = realUrl.substring(indexKey);
+            realUrl = realUrl.replace(indexOp, "");
+            requestStr.replace(url, realUrl);
+            request.setDataInput(requestStr.getBytes());
+            indexOp = indexOp.substring(indexKey + Util.INDEX_KEY.length() + 1);
+        }
+        return indexOp;
     }
     
     public byte[] readFromSocket(InputStream in) throws IOException {
         int off = 0;
         int r = 0;
-        byte[] bufferData = new byte[BUFFER_SIZE];
-        byte[] data = new byte[BUFFER_SIZE * 10];
+        int bufferSize = 1024;
+        byte[] bufferData = new byte[bufferSize];
+        byte[] data = new byte[bufferSize * 10];
 
         while (true) {
             r = in.read(bufferData);
             if (r == -1) break;
             if ( (off + r) > data.length) {
-                data = grow(data, BUFFER_SIZE * 10);
+                data = grow(data, bufferSize * 10);
             }
             System.arraycopy(bufferData, 0, data, off, r);
             off += r;
