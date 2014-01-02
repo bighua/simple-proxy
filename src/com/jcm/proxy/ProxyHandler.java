@@ -5,13 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.binary.StringUtils;
-
 import com.jcm.nioserver.Request;
 import com.jcm.nioserver.Response;
 import com.jcm.nioserver.event.EventAdapter;
-import com.jcm.util.AESCoder;
 import com.jcm.util.Util;
 
 /**
@@ -49,20 +45,20 @@ public class ProxyHandler extends EventAdapter {
     }
     
     private String parse(Request request) throws Exception {
-        String indexOp = null;
-        String requestStr = new String(request.getDataInput());
-        String url = requestStr.substring(0, requestStr.indexOf(Util.LINE_SEPARATOR)).split(Util.SPACE)[1];
-        byte[] key = Hex.decodeHex(url.substring(0, 32).toCharArray());
-        byte[] data = Hex.decodeHex(url.substring(32).toCharArray());
-        String realUrl = StringUtils.newString(AESCoder.decrypt(data, AESCoder.toKey(key)), "UTF-8");
-        int indexKey = realUrl.indexOf(Util.INDEX_KEY);
-        if (indexKey > -1) {
-            indexOp = realUrl.substring(indexKey);
-            realUrl = realUrl.replace(indexOp, "");
-            requestStr.replace(url, realUrl);
-            request.setDataInput(requestStr.getBytes());
-            indexOp = indexOp.substring(indexKey + Util.INDEX_KEY.length() + 1);
-        }
+        String indexOp = "index_add";
+//        String requestStr = new String(request.getDataInput());
+//        String url = requestStr.substring(0, requestStr.indexOf(Util.LINE_SEPARATOR)).split(Util.SPACE)[1];
+//        byte[] key = Hex.decodeHex(url.substring(0, 32).toCharArray());
+//        byte[] data = Hex.decodeHex(url.substring(32).toCharArray());
+//        String realUrl = StringUtils.newString(AESCoder.decrypt(data, AESCoder.toKey(key)), "UTF-8");
+//        int indexKey = realUrl.indexOf(Util.INDEX_KEY);
+//        if (indexKey > -1) {
+//            indexOp = realUrl.substring(indexKey);
+//            realUrl = realUrl.replace(indexOp, "");
+//            requestStr.replace(url, realUrl);
+//            request.setDataInput(requestStr.getBytes());
+//            indexOp = indexOp.substring(indexKey + Util.INDEX_KEY.length() + 1);
+//        }
         return indexOp;
     }
     
