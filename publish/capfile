@@ -1,0 +1,49 @@
+#!/usr/bin/ruby
+# -*- coding: utf-8 -*-
+load 'deploy'
+
+# 项目名
+set :project_name, "robot_uip"
+
+# 发布服务器地址、登录用户名和项目路径
+#set :source_server, "deploy.jcms-8chedao.com"
+set :source_server, "192.168.7.244"
+set :source_user, `whoami`
+set :source_path, "/home/#{source_user}/.jenkins/workspace/robot_uip/dist"
+
+# 需要部署应用的目标服务器地址、用户名、部署路径等
+# set :target_servers, "192.168.6.112"
+#set :target_servers, "192.168.6.112";
+set :target_servers, "192.168.8.202";
+set :target_user, `whoami`
+set :target_deploy_path, "/home/#{target_user}/www/jcm_deploy"
+set :target_project_root, "#{target_deploy_path}/#{project_name}"
+#set :port, "50022"
+#set :scp_port, "50022"
+# 目标端口
+set :port, "22"
+# 源端口
+set :scp_port, "50022"
+# 目标服务器上的java路径
+set :java_home, "/home/kfs/java/jdk1.7.0"
+
+task :install, :hosts => "#{target_servers}" do
+  run <<-CMD
+   if [ ! -d #{target_deploy_path} ]; then echo "create deploy path: #{target_deploy_path}" && mkdir -p #{target_deploy_path}; fi
+   && if [ -d #{target_deploy_path}/#{project_name} ];  then rm -rf #{target_deploy_path}/#{project_name}; fi
+        && scp -rpP #{scp_port} #{source_user}@#{source_server}:#{source_path}/#{project_name} #{target_deploy_path}/
+  CMD
+end
+
+task :start, :hosts => "#{target_servers}" do
+  run <<-CMD
+    cd #{target_project_root} &&
+    ./start.sh
+  CMD
+end
+
+task :stop, :hosts => "#{target_servers}" do
+  run <<-CMD
+    if [ -d #{target_project_root} ];  then cd #{target_project_root} && ./stop.sh; fi
+  CMD
+end
