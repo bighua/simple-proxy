@@ -29,7 +29,6 @@ public class Server extends Thread {
     public Server(Socket cs) {
         csocket=cs;
         log.info("connect with " + cs.getInetAddress().getHostName() + ":" + cs.getPort());
-        start(); 
     }
 
     public void run(){

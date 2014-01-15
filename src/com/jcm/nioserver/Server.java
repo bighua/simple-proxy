@@ -18,10 +18,8 @@ public class Server implements Runnable {
     private ServerSocketChannel sschannel;
     private InetSocketAddress address;
     protected Notifier notifier;
-    private int port;
 
     public Server(int port, int threadsCount) throws Exception {
-        this.port = port;
         notifier = Notifier.getNotifier();
 
         for (int i = 0; i < threadsCount; i++) {
@@ -41,8 +39,6 @@ public class Server implements Runnable {
     }
 
     public void run() {
-        System.out.println("Server started ...");
-        System.out.println("Server listening on port: " + port);
         while (true) {
             try {
                 int num = 0;
