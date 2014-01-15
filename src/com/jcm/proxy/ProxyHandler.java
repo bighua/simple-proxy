@@ -23,6 +23,7 @@ public class ProxyHandler extends EventAdapter {
             int port = Integer.valueOf(Util.p.getProperty(indexOp + "_port"));
             Socket s = new Socket(host,port);
             OutputStream output = s.getOutputStream();
+            
             output.write(request.getDataInput());
             output.flush();
             s.shutdownOutput();
@@ -38,7 +39,9 @@ public class ProxyHandler extends EventAdapter {
         Socket s = (Socket)request.attachment();
         try {
             // 将服务器端数据写入reponse
-            response.send(readFromSocket(s.getInputStream()));
+            byte[] responseBytes = readFromSocket(s.getInputStream());
+            response.send(responseBytes);
+            LogHandler.log.info("write the reponse to "  + request.getAddress().getHostAddress() + ":" + request.getPort());
         } finally {
             s.close();
         }
@@ -80,6 +83,7 @@ public class ProxyHandler extends EventAdapter {
         }
         byte[] res = new byte[off];
         System.arraycopy(data, 0, res, 0, off);
+        in.close();
         return res;
     }
     

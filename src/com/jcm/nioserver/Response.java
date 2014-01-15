@@ -1,8 +1,9 @@
 package com.jcm.nioserver;
 
-import java.nio.channels.SocketChannel;
-import java.nio.ByteBuffer;
+import java.io.EOFException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class Response {
     private SocketChannel sc;
@@ -19,6 +20,11 @@ public class Response {
         ByteBuffer buffer = ByteBuffer.allocate(data.length);
         buffer.put(data, 0, data.length);
         buffer.flip();
-        sc.write(buffer);
+        while (buffer.hasRemaining()) {
+            int len = sc.write(buffer);
+            if (len < 0) {
+                throw new EOFException();
+            }
+        }
     }
 }

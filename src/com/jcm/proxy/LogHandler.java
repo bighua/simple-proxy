@@ -24,6 +24,12 @@ public class LogHandler extends EventAdapter {
     public void onRead(Request request)  throws Exception {
         log.info(Util.LINE_SEPARATOR + new String(request.getDataInput(), "UTF-8"));
     }
+
+//    @Override
+//    public void onWrite(Request request, Response response) throws Exception {
+//        log.info(Util.LINE_SEPARATOR + "transfer response from " + );
+//    }
+    
     @Override
     public void onClosed(Request request) throws Exception {
         log.info("Close connection with " + request.getAddress().getHostAddress() + ":" + request.getPort());
