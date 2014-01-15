@@ -1,6 +1,5 @@
 package com.jcm.proxy;
 
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -33,7 +32,7 @@ public class ProxyServer {
             Thread tServer = new Thread(server);
             tServer.start();
         } catch (Exception e) {
-            LogHandler.log.error("Server error: " + e.getMessage());
+            log.error("Server error: " + e.getMessage());
             System.exit(-1);
         }
     }
@@ -49,12 +48,12 @@ public class ProxyServer {
                 new com.jcm.ioserver.Server(s);
             }
         } catch (NumberFormatException | IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         } finally {
             try {
                 ssock.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
         
