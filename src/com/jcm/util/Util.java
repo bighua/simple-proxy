@@ -1,7 +1,5 @@
 package com.jcm.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -23,7 +21,7 @@ public class Util {
     
     static {
         try {
-            InputStream inputStream = new FileInputStream(new File(Environment.getContext()+"conf/jcm.properties"));
+            InputStream inputStream = Environment.findInputStreamByResource("conf/jcm.properties", Util.class);
             p.load(inputStream);
         } catch (IOException e) {
             LogHandler.log.error("File conf/jcm.properties is not found.");
