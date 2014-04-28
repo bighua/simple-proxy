@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.crypto.Cipher;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 
 public class RSACoder {   
     public static final String KEY_ALGORITHM = "RSA";
@@ -225,6 +226,22 @@ public class RSACoder {
 
         return Base64.encodeBase64String(key.getEncoded());
     }   
+    
+    /**
+     * 从配置文件中取得生成的公钥
+     * @return
+     */
+    public static String getPublicKey() {
+    	return Util.p.getProperty(PUBLIC_KEY);
+    }
+    
+    /**
+     * 从配置文件中取得生成的私钥
+     * @return
+     */
+    public static String getPrivateKey() {
+    	return Util.p.getProperty(PRIVATE_KEY);
+    }
 
     /**
      * 初始化密钥 
@@ -250,4 +267,21 @@ public class RSACoder {
         keyMap.put(PRIVATE_KEY, privateKey);
         return keyMap;
     }
+    
+    public static void main(String[] args) {
+    	try {
+//			Map<String, Object> keys = RSACoder.initKey();
+//			System.out.println(getPublicKey(keys));
+//			System.out.println(getPrivateKey(keys));
+    		byte[] data = RSACoder.encryptByPublicKey("90e2f088bf96d938fcc34c869abcf".getBytes(), Util.p.getProperty(RSACoder.PUBLIC_KEY));
+            System.err.println("加密后:" + Hex.encodeHexStr(data));
+			byte[] dData = RSACoder.decryptByPrivateKey(data, Util.p.getProperty(RSACoder.PRIVATE_KEY));
+			System.out.println(new String(dData));
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+	}
 } 
