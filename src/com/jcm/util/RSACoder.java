@@ -17,7 +17,6 @@ import java.util.Map;
 import javax.crypto.Cipher;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
 
 public class RSACoder {   
     public static final String KEY_ALGORITHM = "RSA";
@@ -120,10 +119,22 @@ public class RSACoder {
 
         return cipher.doFinal(data);
     }   
+    
+    /**
+     * 解密 <br> 
+     * 用私钥解密 
+     * 
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public static String decryptByPrivateKey(String data) throws Exception {
+        return new String(decryptByPrivateKey(Hex.decodeHex(data.toCharArray()), getPrivateKey()));
+    }
 
     /** 
      * 解密<br> 
-     * 用私钥解密 
+     * 用公钥解密 
      *   
      * @param data 
      * @param key 
@@ -146,6 +157,18 @@ public class RSACoder {
 
         return cipher.doFinal(data);
     }   
+    
+    /**
+     * 解密 <br> 
+     * 用公钥解密 
+     * 
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public static String decryptByPublicKey(String data) throws Exception {
+        return new String(decryptByPrivateKey(Hex.decodeHex(data.toCharArray()), getPublicKey()));
+    }
 
     /** 
      * 加密<br> 
@@ -172,6 +195,18 @@ public class RSACoder {
 
         return cipher.doFinal(data);
     }   
+    
+    /**
+     * 加密<br> 
+     * 用公钥加密 
+     * 
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public static String encryptByPublicKey(byte[] data) throws Exception {
+        return Hex.encodeHexStr(encryptByPublicKey(data, getPublicKey()));
+    }
 
     /**
      * 加密<br> 
@@ -198,6 +233,18 @@ public class RSACoder {
 
         return cipher.doFinal(data);
     }   
+    
+    /**
+     * 加密<br> 
+     * 用私钥加密 
+     * 
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public static String encryptByPrivateKey(byte[] data) throws Exception {
+        return Hex.encodeHexStr(encryptByPrivateKey(data, getPrivateKey()));
+    }
 
     /**
      * 取得私钥 
@@ -273,10 +320,10 @@ public class RSACoder {
 //			Map<String, Object> keys = RSACoder.initKey();
 //			System.out.println(getPublicKey(keys));
 //			System.out.println(getPrivateKey(keys));
-    		byte[] data = RSACoder.encryptByPublicKey("90e2f088bf96d938fcc34c869abcf".getBytes(), Util.p.getProperty(RSACoder.PUBLIC_KEY));
-            System.err.println("加密后:" + Hex.encodeHexStr(data));
-			byte[] dData = RSACoder.decryptByPrivateKey(data, Util.p.getProperty(RSACoder.PRIVATE_KEY));
-			System.out.println(new String(dData));
+    		String data = RSACoder.encryptByPublicKey("90e2f088bf96d938fcc34c869abcf".getBytes());
+            System.err.println("加密后:" + data);
+            String dData = RSACoder.decryptByPrivateKey(data);
+			System.out.println(dData);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
