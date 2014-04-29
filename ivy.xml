@@ -17,7 +17,7 @@
   <dependencies defaultconf="*->default">
     <dependency org="org.hamcrest" name="hamcrest-all" rev="1.3" transitive="false" />
     <dependency org="junit" name="junit" rev="4.8.2" transitive="false" />
-    <dependency org="com.jcm" name="ztools" rev="1.12.1" transitive="true"/>
+    <dependency org="com.ztools" name="ztools" rev="1.14" transitive="true"/>
     <dependency org="commons-codec" name="commons-codec" rev="1.8"/>
     <dependency org="log4j" name="log4j" transitive="false" rev="1.2.17" />
     <!-- globe exclude -->
