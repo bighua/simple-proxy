@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-  <info organisation="com.jcm" module="ycm-proxy" revision="1.0">
+  <info organisation="com.jcm" module="jcm-proxy" revision="1.0">
     <ivyauthor name="Zhu Xianghua" url="mailto:zhuxianghua@8chedao.com" />
     <description>
       Describes the current module. This tag is the only one which can contain
