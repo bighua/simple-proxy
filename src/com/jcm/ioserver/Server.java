@@ -16,11 +16,11 @@ public class Server extends Thread {
     public static final Logger log = Logger.getLogger(Server.class);
     
     //尝试与目标主机连接次数
-    static public int CONNECT_RETRIES=5;
+    static public int CONNECT_RETRIES=Integer.parseInt(Util.p.getProperty("connect_retries"));
     //每次建立连接的间隔时间
-    static public int CONNECT_PAUSE=5;
+    static public int CONNECT_PAUSE=Integer.parseInt(Util.p.getProperty("connect_pause"));
     //每次尝试连接的最大时间
-    static public int TIMEOUT=50;
+    static public int TIMEOUT=Integer.parseInt(Util.p.getProperty("connect_timeout"));
     //缓冲区最大字节数
     static public int BUFSIZ=1024;
     // 与客户端相连的Socket
@@ -33,7 +33,7 @@ public class Server extends Thread {
 
     public void run(){
         //读取请求头
-        String buffer = "";
+    	StringBuilder buffer = new StringBuilder();
         String host = Util.p.getProperty("index_add_host");
         int port = Integer.valueOf(Util.p.getProperty("index_add_port"));
         Socket ssocket = null;
@@ -53,9 +53,9 @@ public class Server extends Thread {
                 if(c==-1) break;
                 //读入第一行数据
                 if(c=='\r'||c=='\n') break;
-                buffer=buffer+(char)c;
+                buffer.append((char)c);
             }
-            String head =transferRequestURL(buffer, host + ":" + port);
+            String head =transferRequestURL(buffer.toString(), host + ":" + port);
             int retry=CONNECT_RETRIES;
             while (retry--!=0) {
                 try {
@@ -73,6 +73,7 @@ public class Server extends Thread {
                 sos=ssocket.getOutputStream();
                 //将请求头写入
                 sos.write(head.getBytes());
+                log.info("pipe stream from both ends.");
                 //建立通信管道
                 pipe(cis,sis,sos,cos);
             }
@@ -120,6 +121,7 @@ public class Server extends Thread {
 //            url = "http://" + targetAddr + url;
         }
         buffer = tokens[0] + " " + url + " " + tokens[2];
+        System.out.println(buffer);
         return buffer;
     }
     
@@ -136,6 +138,7 @@ public class Server extends Thread {
                         break;
                     }
                 } catch(SocketTimeoutException e){
+                    log.error("client socket timeout Exception:" + e.getMessage());
                 } catch (IOException e) {
                     log.error("Request Exception:" + e.getMessage());
                 }
@@ -147,6 +150,7 @@ public class Server extends Thread {
                         break;
                     }
                 } catch(SocketTimeoutException e){
+                    log.error("server socket timeout Exception:" + e.getMessage());
                 } catch (InterruptedIOException e) {
                     log.error("Response Exception:" + e.getMessage());
                 }
