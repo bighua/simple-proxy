@@ -32,10 +32,11 @@ public class Server extends Thread {
     }
 
     public void run(){
-        //读取请求头
-    	StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
         String host = Util.p.getProperty("index_add_host");
         int port = Integer.valueOf(Util.p.getProperty("index_add_port"));
+        String targetAddr = host + ":" + port;
+        log.info("====transmission between " + csocket.getInetAddress().getHostName() + ":" + csocket.getPort() + " and " + targetAddr + "start!");
         Socket ssocket = null;
         //cis为客户端输入流，sis为目标主机输入流
         InputStream cis = null;
@@ -51,17 +52,17 @@ public class Server extends Thread {
                 int c=cis.read();
                 //-1为结尾标志
                 if(c==-1) break;
-                //读入第一行数据
+                //读取请求头第一行数据
                 if(c=='\r'||c=='\n') break;
                 buffer.append((char)c);
             }
-            String head =transferRequestURL(buffer.toString(), host + ":" + port);
+            String head =transferRequestURL(buffer.toString(), targetAddr);
             int retry=CONNECT_RETRIES;
             while (retry--!=0) {
                 try {
                     //尝试建立与目标主机的连接
                     ssocket = new Socket(host,port);
-                    log.info("transfer the request to " + host + ":" + port);
+                    log.info("transfer the request to " + targetAddr);
                     break;
                 } catch (Exception e) { }
                 // 等待
@@ -76,6 +77,7 @@ public class Server extends Thread {
                 log.info("pipe stream from both ends.");
                 //建立通信管道
                 pipe(cis,sis,sos,cos);
+                log.info("====transmission between " + csocket.getInetAddress().getHostName() + ":" + csocket.getPort() + " and " + targetAddr + "completed!");
             }
         } catch(InterruptedException | IOException e){
             log.error(e.getMessage());
